@@ -17,14 +17,25 @@ const { ccclass, property } = _decorator;
 @ccclass('Bullet')
 export class Bullet extends Component {
 
+    /** 伤害 */
+    @property
+    damage = 0;
+
+    /**速度 */
     @property
     speed = 0;
 
+    /** 发射子弹单位 */
     @property({type:Node})
     owner;
 
-    @property()
-    target:Vec3|Node;
+    /**目标位置*/
+    @property({type:Vec3,group:"header"})
+    targetPos:Vec3;
+
+    /**目标节点 */
+    @property({type:Node})
+    target;
 
     start () {
 
@@ -35,9 +46,24 @@ export class Bullet extends Component {
     //     // [4]
     // }
 
-    action () {
+    /**
+     * 设置数据
+     */
+    setData({damage = 0,targetPos,target}){
+        this.damage = damage;
+        this.targetPos = targetPos;
+        this.target = target;
+    }
+
+    public action () {
         tween(this.node)
-       
+        .to(1,{position: this.targetPos})
+        .call(()=> {})
+        .start()
+    }
+
+    reach (){
+        console.log("命中目标！")
     }
 }
 
