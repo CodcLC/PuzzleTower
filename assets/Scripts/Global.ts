@@ -1,12 +1,10 @@
 import { _decorator, Component, Node, instantiate, loader, resources, Prefab, Asset } from 'cc';
-import { singleton } from './Public/Singleton';
+import { CSingleton } from './Public/CSingleton';
 import { MapTilesManager } from './Tower/Map/MapTiles';
 const { ccclass, property } = _decorator;
 
 @ccclass('Global')
-class Global {
-
+export class Global extends CSingleton{
+    @property({type:MapTilesManager})
     mapTilesManager:MapTilesManager
 }
-
-export const GlobalSingleton = singleton(Global)
