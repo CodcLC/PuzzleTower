@@ -49,7 +49,7 @@ export class Bullet extends Component {
     /**
      * 设置数据
      */
-    setData({damage = 0,targetPos,target}){
+    Init({damage = 0,targetPos,target}){
         this.damage = damage;
         this.targetPos = targetPos;
         this.target = target;

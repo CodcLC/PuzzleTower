@@ -1,25 +1,27 @@
 
-import { _decorator, Component, Node, instantiate, loader, resources } from 'cc';
-import { TowerDefines } from './TowerDefines';
+import { _decorator, Component, Node } from 'cc';
 const { ccclass, property } = _decorator;
 
 /**
  * Predefined variables
- * Name = TowerManager
- * DateTime = Thu Jan 13 2022 18:52:49 GMT+0800 (中国标准时间)
+ * Name = MainPanel
+ * DateTime = Fri Jan 14 2022 18:56:22 GMT+0800 (中国标准时间)
  * Author = easyStIck
- * FileBasename = TowerManager.ts
- * FileBasenameNoExtension = TowerManager
- * URL = db://assets/Scripts/Public/Tower/TowerManager.ts
+ * FileBasename = MainPanel.ts
+ * FileBasenameNoExtension = MainPanel
+ * URL = db://assets/Scripts/UI/MainPanel.ts
  * ManualUrl = https://docs.cocos.com/creator/3.3/manual/en/
  *
  */
  
-@ccclass('TowerManager')
-export class TowerManager extends Component {
+@ccclass('MainPanel')
+export class MainPanel extends Component {
+    // [1]
+    // dummy = '';
 
-    /**塔对象容器 */
-    towerDict = {};
+    // [2]
+    // @property
+    // serializableDummy = 0;
 
     start () {
         // [3]
@@ -28,11 +30,6 @@ export class TowerManager extends Component {
     // update (deltaTime: number) {
     //     // [4]
     // }
-
-    addTower(){
-        let towetPath = TowerDefines.TowerPath
-        let tower = resources.load(,function(){})
-    }
 }
 
 /**

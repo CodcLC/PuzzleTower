@@ -4,24 +4,30 @@ const { ccclass, property } = _decorator;
 
 /**
  * Predefined variables
- * Name = BaseTower
- * DateTime = Thu Jan 13 2022 18:41:25 GMT+0800 (中国标准时间)
+ * Name = UITowerITem
+ * DateTime = Fri Jan 14 2022 18:56:39 GMT+0800 (中国标准时间)
  * Author = easyStIck
- * FileBasename = BaseTower.ts
- * FileBasenameNoExtension = BaseTower
- * URL = db://assets/Scripts/Public/Tower/BaseTower.ts
+ * FileBasename = UITowerITem.ts
+ * FileBasenameNoExtension = UITowerITem
+ * URL = db://assets/Scripts/UI/UITowerITem.ts
  * ManualUrl = https://docs.cocos.com/creator/3.3/manual/en/
  *
  */
  
-@ccclass('BaseTower')
-export class BaseTower extends Component {
+@ccclass('UITowerITem')
+export class UITowerITem extends Component {
     // [1]
     // dummy = '';
 
     // [2]
     // @property
     // serializableDummy = 0;
+
+    onLoad() {
+        this.node.on(Node.EventType.TOUCH_START,this.onTouchStart)
+        this.node.on(Node.EventType.TOUCH_MOVE,this.onTouchMove)
+        this.node.on(Node.EventType.TOUCH_CANCEL,this.onMouseUp)
+    }
 
     start () {
         // [3]
@@ -31,8 +37,18 @@ export class BaseTower extends Component {
     //     // [4]
     // }
 
-    attack(target){
-        
+    onTouchStart(){
+        console.error("touchStart")
+    }
+
+    onTouchMove(){
+        console.error("touchMove")
+
+    }
+
+    onMouseUp(){
+        console.error("touchEnd")
+
     }
 }
 
