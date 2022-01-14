@@ -1,5 +1,5 @@
 import { _decorator, Component, Node, instantiate, loader, resources, Prefab, Asset } from 'cc';
-import { CSingleton } from './Public/CSingleton';
+import { CSingleton } from './Public/Singleton/CSingleton';
 import { MapTilesManager } from './Tower/Map/MapTiles';
 const { ccclass, property } = _decorator;
 
