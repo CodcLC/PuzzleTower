@@ -16,13 +16,8 @@ const { ccclass, property } = _decorator;
  
 @ccclass('MainPanel')
 export class MainPanel extends Component {
-    // [1]
-    // dummy = '';
-
-    // [2]
-    // @property
-    // serializableDummy = 0;
-
+    @property({type:Node})
+    towerGrid
     start () {
         // [3]
     }
