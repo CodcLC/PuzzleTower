@@ -1,5 +1,16 @@
+/*
+ * @Author: your name
+ * @Date: 2022-01-15 20:15:50
+ * @LastEditTime: 2022-01-16 19:06:24
+ * @LastEditors: Please set LastEditors
+ * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @FilePath: \PuzzleTower\assets\Scripts\UI\UITowerItem.ts
+ */
 
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Node, RichText, Label, Prefab, resources, instantiate, isUnicodeSpace, isValid } from 'cc';
+import { TowerType, TowerNameMap } from '../Tower/TowerDefines';
+import { getPathByTowerType } from '../Tower/TowerUtils';
+import { Global } from '../Global';
 const { ccclass, property } = _decorator;
 
 /**
@@ -14,25 +25,39 @@ const { ccclass, property } = _decorator;
  *
  */
  
-@ccclass('UITowerITem')
-export class UITowerITem extends Component {
-    // [1]
-    // dummy = '';
+@ccclass('UITowerItem')
+export class UITowerItem extends Component {
 
-    // [2]
-    // @property
-    // serializableDummy = 0;
+    private towerType = 0
+    public get TowerType() {
+        return this.towerType;
+    }
+    public set TowerType(value) {
+        this.towerType = value;
+    }
+
+    @property({type:Label})
+    nameText:Label = null
+
 
     onLoad() {
-        this.node.on(Node.EventType.TOUCH_START,this.onTouchStart)
-        this.node.on(Node.EventType.TOUCH_MOVE,this.onTouchMove)
-        this.node.on(Node.EventType.TOUCH_CANCEL,this.onMouseUp)
+        this.node.on(Node.EventType.TOUCH_START,this.onTouchStart,this)
+        this.node.on(Node.EventType.TOUCH_MOVE,this.onTouchMove,this)
+        this.node.on(Node.EventType.TOUCH_CANCEL,this.onTouchCancel,this)
+        this.node.on(Node.EventType.TOUCH_END,this.onTouchEnd,this)
     }
 
     start () {
         // [3]
     }
 
+    init (towerType) {
+        this.towerType = towerType
+        let name = TowerNameMap.get(this.towerType)
+        this.nameText.string = name.toString()
+    }
+
+   
     // update (deltaTime: number) {
     //     // [4]
     // }
@@ -41,15 +66,33 @@ export class UITowerITem extends Component {
         console.error("touchStart")
     }
 
-    onTouchMove(){
+
+    onTouchMove(touchEvent){
         console.error("touchMove")
-
+        let global:Global = Global.Instance<Global>()
+        if (!global.uiDragPanel.dragging){
+            global.uiDragPanel.startDragTower(this.towerType)
+            
+        }else{
+            let location = touchEvent.getLocation();
+            global.uiDragPanel.setDragPos(this.towerType,location)
+        }
     }
 
-    onMouseUp(){
-        console.error("touchEnd")
-
+    onTouchEnd(touchEvent){
+        console.error("onTouchEnd")
+        Global.Instance<Global>().uiDragPanel.cancelDragTower(this.towerType)
     }
+
+    /**
+     * 拖动结束在节点外 检测是否拖动到塔的瓦片
+     * @param touchEvent 
+     */
+    onTouchCancel(touchEvent){
+        console.error("onTouchCancel")
+        Global.Instance<Global>().uiDragPanel.endDragTower(this.towerType)
+    }
+    
 }
 
 /**
