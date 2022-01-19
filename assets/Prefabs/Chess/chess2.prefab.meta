@@ -2,12 +2,12 @@
   "ver": "1.1.32",
   "importer": "prefab",
   "imported": true,
-  "uuid": "af99d11a-4506-4140-ade5-8b3da0e62a7e",
+  "uuid": "d847e1b9-7beb-46dc-b247-3047f6817696",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "ChessNode-000"
+    "syncNodeName": "chess2"
   }
 }

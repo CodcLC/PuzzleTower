@@ -13,24 +13,54 @@ const { ccclass, property } = _decorator;
  * ManualUrl = https://docs.cocos.com/creator/3.3/manual/en/
  *
  */
- 
-@ccclass('DataStruct')
-export class DataStruct extends Component {
-    // [1]
-    // dummy = '';
-
-    // [2]
-    // @property
-    // serializableDummy = 0;
-
-    start () {
-        // [3]
-    }
-
-    // update (deltaTime: number) {
-    //     // [4]
-    // }
+ /**
+ * 组合类型
+ */
+export enum CombinationType {
+    Horizontal = 0, // 横型
+    Vertical, // 竖型
+    Cross, // 十字型
+    TShape, // T 型
+    LShape, // L 型
 }
+export enum ChessType{
+    Yellow = 0,
+    Blue,
+    Red,
+
+    ChessTypeNum
+}
+
+export enum ChessState{
+    Active = 0,
+    CanRemove,
+    Combinationing,
+    Generating,
+    Moving,
+}
+
+export enum ChessMapState{
+    Active = 0,
+    NotOperational,
+
+}
+
+export class Coordinate{
+    public col:number;
+    public row:number;
+    
+
+}
+
+export class GameConfig{
+    public static GAME_ROW_NUM = 8;
+    public static GAME_COL_NUM = 8;
+    public static GAME_CHESS_TYPE_NUM = 3;
+}
+
+
+
+
 
 /**
  * [1] Class member could be defined like this.

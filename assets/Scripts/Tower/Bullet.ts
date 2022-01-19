@@ -57,8 +57,8 @@ export class Bullet extends Component {
 
     public action () {
         tween(this.node)
-        .to(1,{position: this.targetPos})
-        .call(()=> {})
+        .to(1,{position: this.target??this.targetPos})
+        .call(this.reach)
         .start()
     }
 
