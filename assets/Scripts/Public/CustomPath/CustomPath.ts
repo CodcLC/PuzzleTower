@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node, Graphics, tween, TweenSystem, Tween, Color, find, Camera, UITransform, Vec3, Sprite, Vec2, Size, resources, assetManager, SpriteFrame } from 'cc';
+import { _decorator, Component, Node, Graphics, tween, TweenSystem, Tween, Color, find, Camera, UITransform, Vec3, Sprite, Vec2, Size, resources, assetManager, SpriteFrame, Prefab, instantiate, Asset, AssetManager, assertID, bezier, debug } from 'cc';
 import { EDITOR } from 'cc/env';
 import { CustomLine } from './CustomLine';
 import { Dragable } from './Dragable';
@@ -44,12 +44,9 @@ export class CustomPath extends Component {
 
     graphic:Graphics
     uiTrans:UITransform
-    spriteFrame:SpriteFrame
 
     start () {
-        resources.load("Arts/ChessImg/Chess1",SpriteFrame,(error,spriteFrame)=>{
-            this.spriteFrame = spriteFrame
-        })
+        console.error("start")
         this.graphic = this.node.getComponent(Graphics)
         this.uiTrans = this.graphic.getComponent(UITransform)
 
@@ -62,9 +59,6 @@ export class CustomPath extends Component {
 
 
     onEnable(){
-        if (this.graphic == null){
-            this.graphic = this.node.getComponent(Graphics)
-        }
         this._drawAllLines()
     }
 
@@ -106,6 +100,7 @@ export class CustomPath extends Component {
         })
     }
 
+    
     /**
      * 初始化线段
      */
@@ -158,6 +153,7 @@ export class CustomPath extends Component {
                     }
     
                     customLine.init(lastPointNode,pointNode,ctrl1Node,ctrlNode)
+                    customLine.CreateBezierPoints(this.uiTrans,10,this.graphic)
                     this._registerLineEvent(customLine)
                     lastPointNode = pointNode
                     lastCtrlNode = ctrlNode
@@ -182,6 +178,21 @@ export class CustomPath extends Component {
     }
 
     /**
+     * 获取路径上所有点
+     * @returns 
+     */
+    public getPoints(){
+        let points:Vec3[] = []
+        this.customLines.forEach((line)=>{
+            if (line.passPoints!=null){
+                points = points.concat(line.passPoints)
+                console.error("aaa  ",line.passPoints,line.passPoints.length)
+            }
+        })
+        return points
+    }
+
+    /**
      * 创建基点
      * @param i 
      * @param pointPos 
@@ -192,7 +203,6 @@ export class CustomPath extends Component {
         let pointUiTrans = pointNode.addComponent(UITransform)
         pointUiTrans.contentSize = new Size(50,50)
         let pointSprite = pointNode.addComponent(Sprite)
-        pointSprite.spriteFrame = this.spriteFrame
         pointSprite.color = Color.BLUE
         pointNode.setParent(this.node)
         pointNode.setWorldPosition(pointPos)
@@ -210,7 +220,6 @@ export class CustomPath extends Component {
         let ctrlUiTrans = ctrlNode.addComponent(UITransform)
         ctrlUiTrans.contentSize = new Size(50,50)
         let ctrlSprite = ctrlNode.addComponent(Sprite)
-        ctrlSprite.spriteFrame = this.spriteFrame
         ctrlSprite.color = Color.RED
         ctrlNode.setWorldPosition(pointPos.add(new Vec3(0,100,0)))
         return ctrlNode
@@ -239,10 +248,16 @@ export class CustomPath extends Component {
         }
     }
 
-    /**
+
+    /***************************************************************************
      * 绘制路径
      */
     _drawAllLines(){
+        if (this.graphic == null){
+            this.graphic = this.node.getComponent(Graphics)
+            this.uiTrans = this.getComponent(UITransform)
+        }
+        
         this.graphic.clear();
         this.customLines.forEach((customLine) => {
             this._drawOneBezier(customLine);    

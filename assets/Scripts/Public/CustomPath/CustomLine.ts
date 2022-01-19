@@ -1,5 +1,5 @@
 
- import { _decorator, Component, Node, Graphics, UITransform } from 'cc';
+ import { _decorator, Component, Node, Graphics, UITransform, Vec3, Color } from 'cc';
  const { ccclass, property } = _decorator;
 /**
  * Predefined variables
@@ -38,6 +38,9 @@
 
     // private uiTrans:UITransform
 
+    passPoints:Vec3[] = []
+
+
     onLoad(){
 
     }
@@ -61,6 +64,44 @@
         this.ctrl1.destroy()
         this.ctrl2.destroy()        
     }
+
+    /**
+     * 创建经过的点位
+     * @param uiTrans 
+     * @param pointsAmount 
+     * @param graphics 
+     * @returns 
+     */
+    public CreateBezierPoints(uiTrans,pointsAmount:number,graphics)
+    {
+        this.passPoints = []
+        let startPos = uiTrans.convertToNodeSpaceAR(this.startNode.worldPosition)
+        let endPos = uiTrans.convertToNodeSpaceAR(this.targetNode.worldPosition)
+        let ctr1Pos = uiTrans.convertToNodeSpaceAR(this.ctrl1.worldPosition)
+        let ctr2Pos = uiTrans.convertToNodeSpaceAR(this.ctrl2.worldPosition)
+        let points = [startPos,ctr1Pos,ctr2Pos,endPos]
+        for (var i = 0; i < pointsAmount; i++) {
+            let t = i/pointsAmount
+            const x = startPos.x * (1 - t) * (1 - t) * (1 - t) + 3 * ctr1Pos.x * t * (1 - t) * (1 - t) + 3 * ctr2Pos.x * t * t * (1 - t) + endPos.x * t * t * t;
+            const y = startPos.y * (1 - t) * (1 - t) * (1 - t) + 3 * ctr1Pos.y * t * (1 - t) * (1 - t) + 3 * ctr2Pos.y * t * t * (1 - t) + endPos.y * t * t * t;
+            var point = new Vec3(x,y,0)
+            if (i == 0){
+                graphics.moveTo(point.x,point.y)
+            }else{
+                graphics.color = Color.BLUE
+                graphics.lineWidth = 10
+                graphics.lineTo(point.x,point.y)
+                graphics.stroke()
+                graphics.moveTo(point.x,point.y)
+                
+            }
+            this.passPoints.push(point);
+        }
+        
+        return this.passPoints;
+ 
+    }
+
  }
 
 /**
