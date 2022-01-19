@@ -22,27 +22,30 @@ const { ccclass, property,executeInEditMode } = _decorator;
 export class CustomPath extends Component {
     
 
-    
+    /**
+     * 点信息
+     */
     points:Vec3[] = new Array<Vec3>()
-
     @property([Vec3])
     public get Points(){
         return this.points
     }
-    
     public set Points(value){
         this.points = value
         this.initLines()
     }
 
+    /**
+     * 线段信息
+     */
     @property(Array(CustomLine))
     customLines = new Array<CustomLine>()
 
-    
 
     graphic:Graphics
     uiTrans:UITransform
     spriteFrame:SpriteFrame
+
     start () {
         resources.load("Arts/ChessImg/Chess1",SpriteFrame,(error,spriteFrame)=>{
             this.spriteFrame = spriteFrame
@@ -55,7 +58,6 @@ export class CustomPath extends Component {
         })
 
         this._drawAllLines()
-        console.error("start")
     }
 
 
@@ -65,10 +67,6 @@ export class CustomPath extends Component {
         }
         this._drawAllLines()
     }
-    
-    // update (deltaTime: number) {
-    //     // [4]
-    // }
 
     onDestroy(){
         this.customLines.forEach((customLine) => {
@@ -76,6 +74,10 @@ export class CustomPath extends Component {
         });
     }
 
+    /**
+     * 注册节点事件
+     * @param customLine 
+     */
     _registerLineEvent(customLine:CustomLine){
         [
             this.node,
@@ -88,7 +90,10 @@ export class CustomPath extends Component {
         })
     }
 
-
+    /**
+     * 取消注册事件
+     * @param customLine 
+     */
     _unregisterNodeEvent(customLine:CustomLine) {
         [
             this.node,
@@ -101,13 +106,17 @@ export class CustomPath extends Component {
         })
     }
 
+    /**
+     * 初始化线段
+     */
     initLines(){
-        var lastPointNode:Node,lastCtrlNode:Node
         var lineCount = 0
-        for(let i =0;i<this.points.length;i++){
-            let point = this.points[i]
-            if(i==0){
-                if (this.points.length>=2){
+        if (this.points.length>=2){
+            var lastPointNode:Node,lastCtrlNode:Node          
+            for(let i =0;i<this.points.length;i++){
+                let point = this.points[i]
+                //记录路径初始点
+                if(i==0){
                     let customLine = this.customLines[0]
                     if(customLine == null){
                         var lastPointNode = this._createPoint(i,point)
@@ -116,41 +125,68 @@ export class CustomPath extends Component {
                     }else{
                         lastPointNode = customLine.startNode
                         lastCtrlNode = customLine.ctrl1
+                        lastPointNode.setWorldPosition(this.uiTrans.convertToWorldSpaceAR(point))
                     }
-                } 
-            }
-            else{
-                let customLine = this.customLines[i-1]
-                if(customLine==null){
-                    customLine = new CustomLine()
-                    this.customLines.push(customLine)
-                    var pointNode = this._createPoint(i,point)
-                    var ctrlNode = this._createCtrl(i,point)
-                    ctrlNode.setParent(pointNode)
-                }else{
-                    pointNode = customLine.targetNode
-                    ctrlNode = customLine.ctrl2
                 }
-                
-                if(lineCount!=0)
-                {
-                    var ctrl1Node = this._createCtrl(i,point)
-                    ctrl1Node.setParent(lastPointNode)
-                }else{
-                    ctrl1Node = lastCtrlNode
+                else{
+                    let customLine = this.customLines[i-1]
+                    if(customLine==null){
+                        customLine = new CustomLine()
+                        this.customLines.push(customLine)
+                        var pointNode = this._createPoint(i,point)
+                        var ctrlNode = this._createCtrl(i,point)
+                        ctrlNode.setParent(pointNode)
+                    }else{
+                        pointNode = customLine.targetNode
+                        ctrlNode = customLine.ctrl2
+                        pointNode.setWorldPosition(this.uiTrans.convertToWorldSpaceAR(point))
+                    }
+    
+                    //创建首端节点的控制点
+                    var ctrl1Node
+                    if(lineCount!=0)
+                    {
+                        if(customLine.ctrl1!=null){
+                            ctrl1Node = customLine.ctrl1
+                        }else{
+    
+                            ctrl1Node = this._createCtrl(i,point)
+                        }
+                        ctrl1Node.setParent(lastPointNode)
+                    }else{
+                        ctrl1Node = lastCtrlNode
+                    }
+    
+                    customLine.init(lastPointNode,pointNode,ctrl1Node,ctrlNode)
+                    this._registerLineEvent(customLine)
+                    lastPointNode = pointNode
+                    lastCtrlNode = ctrlNode
+                    lineCount+=1
                 }
-
-                customLine.init(lastPointNode,pointNode,ctrl1Node,ctrlNode)
-                this._registerLineEvent(customLine)
-                lastPointNode = pointNode
-                lastCtrlNode = ctrlNode
-                lineCount+=1
+    
             }
-
         }
+        
+        //销毁用不到的线
+        if (lineCount<this.customLines.length){
+            for(let i = this.customLines.length-1;i>=lineCount;i--)
+            {
+                let customLine = this.customLines[i]
+                customLine.destroy(i==0)
+            
+            }
+            this.customLines.splice(lineCount,this.customLines.length-lineCount)
+        }
+        
         this._drawAllLines()
     }
 
+    /**
+     * 创建基点
+     * @param i 
+     * @param pointPos 
+     * @returns 
+     */
     _createPoint(i,pointPos:Vec3):Node{
         let pointNode = new Node("point"+i)
         let pointUiTrans = pointNode.addComponent(UITransform)
@@ -163,6 +199,12 @@ export class CustomPath extends Component {
         return pointNode
     }
 
+    /**
+     * 创建控制点
+     * @param i 
+     * @param pointPos 
+     * @returns 
+     */
     _createCtrl(i,pointPos:Vec3):Node{
         let ctrlNode = new Node("ctrl"+i)
         let ctrlUiTrans = ctrlNode.addComponent(UITransform)
@@ -176,9 +218,30 @@ export class CustomPath extends Component {
 
 
     onTransfomrChanged(customLine:CustomLine){
+        this._updatePoints()
         this._drawAllLines()   
     }
 
+    /**
+     * 更新点位置信息
+     */
+    _updatePoints(){
+        for(let i=0;i<this.points.length;i++){
+            if(i==this.points.length-1){
+                let customLine = this.customLines[i-1]
+                if(customLine!=null && customLine.targetNode!=null)
+                    this.points[i] = this.uiTrans.convertToNodeSpaceAR(customLine.targetNode.worldPosition)
+            }else{
+                let customLine = this.customLines[i]
+                if(customLine!=null && customLine.startNode!=null)
+                    this.points[i] = this.uiTrans.convertToNodeSpaceAR(customLine.startNode.worldPosition)
+            }
+        }
+    }
+
+    /**
+     * 绘制路径
+     */
     _drawAllLines(){
         this.graphic.clear();
         this.customLines.forEach((customLine) => {

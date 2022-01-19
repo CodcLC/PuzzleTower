@@ -52,6 +52,15 @@
         this.ctrl1 = ctrl1 
         this.ctrl2 = ctrl2 
     }
+
+    public destroy(destroyStart){
+        if (destroyStart == true){
+            this.startNode.destroy()
+        }
+        this.targetNode.destroy()
+        this.ctrl1.destroy()
+        this.ctrl2.destroy()        
+    }
  }
 
 /**
