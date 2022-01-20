@@ -7,10 +7,16 @@
  * @FilePath: \PuzzleTower\assets\Scripts\Tower\TowerUtils.ts
  */
 import { BaseTower } from "./BaseTower";
-import { TowerPath as TowerTempPath, TowerPrefabMap } from './TowerDefines';
+import { MonsterPath, MonsterType, TowerPath as TowerTempPath, TowerPrefabMap } from './TowerDefines';
 
 export function getPathByTowerType(towerType){
     let prefabName = TowerPrefabMap.get(towerType)
     var towerPath = TowerTempPath.format(prefabName)
+    return towerPath
+}
+
+export function getPathByMonsterType(monsterType){
+    let prefabName = monsterType
+    var towerPath = MonsterPath.format(prefabName)
     return towerPath
 }

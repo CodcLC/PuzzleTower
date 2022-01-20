@@ -36,8 +36,16 @@ export const TowerClassType = new Map<TowerType,Object>([
     [TowerType.Circle,BaseTower],
 ]);
 
+
+//怪物定义
+export enum MonsterType{
+    Test = "Test",
+}
+
+
 //资源模板地址
 export const TowerPath = "Prefabs/Tower/{0}"
+//怪物路径
+export const MonsterPath = "Prefabs/Monster/{0}"
 //TowerItem预制体地址
 export const UITowerItemPath = "Prefabs/Tower/UI/UITowerItem.prefab"
-

@@ -1,8 +1,12 @@
-
-import { _decorator, Component, Node, Graphics, tween, TweenSystem, Tween, Color, find, Camera, UITransform, Vec3, Sprite, Vec2, Size, resources, assetManager, SpriteFrame, Prefab, instantiate, Asset, AssetManager, assertID, bezier, debug } from 'cc';
+/// <reference types='@types/node' />
+import { macro,_decorator, Component, Node, Graphics, tween, TweenSystem, Tween, Color, find, Camera, UITransform, Vec3, Sprite, Vec2, Size, resources, assetManager, SpriteFrame, Prefab, instantiate, Asset, AssetManager, assertID, bezier, debug, getPathFromRoot, ccenum } from 'cc';
 import { EDITOR } from 'cc/env';
+import { url } from 'inspector';
+import { pathToFileURL } from 'url';
 import { CustomLine } from './CustomLine';
 import { Dragable } from './Dragable';
+
+// import * as fs from 'fs';
 const { ccclass, property,executeInEditMode } = _decorator;
 
 /**
@@ -20,7 +24,7 @@ const { ccclass, property,executeInEditMode } = _decorator;
 @ccclass('CustomPath')
 @executeInEditMode
 export class CustomPath extends Component {
-    
+
 
     /**
      * 点信息
@@ -35,6 +39,18 @@ export class CustomPath extends Component {
         this.initLines()
     }
 
+
+    /**
+     * 路径上所有经过的点位
+     */
+    private passPoints:Vec3[] = new Array<Vec3>()
+    @property([Vec3])
+    public get PassPoints(){
+        return this.passPoints
+    }
+
+
+    
     /**
      * 线段信息
      */
@@ -154,6 +170,7 @@ export class CustomPath extends Component {
     
                     customLine.init(lastPointNode,pointNode,ctrl1Node,ctrlNode)
                     customLine.CreateBezierPoints(this.uiTrans,10,this.graphic)
+                    this.GetPassPoints()
                     this._registerLineEvent(customLine)
                     lastPointNode = pointNode
                     lastCtrlNode = ctrlNode
@@ -181,15 +198,35 @@ export class CustomPath extends Component {
      * 获取路径上所有点
      * @returns 
      */
-    public getPoints(){
-        let points:Vec3[] = []
+    public GetPassPoints(){
         this.customLines.forEach((line)=>{
             if (line.passPoints!=null){
-                points = points.concat(line.passPoints)
-                console.error("aaa  ",line.passPoints,line.passPoints.length)
+                this.passPoints = this.passPoints.concat(line.passPoints)
+                console.error("PassPoints  ",line.passPoints,line.passPoints.length)
             }
         })
-        return points
+
+        //写文件
+        let str = ""
+        this.passPoints.forEach((point)=>{
+            str +=point.x+" "+point.y+" "+point.z+"|"
+        })
+
+        let fs = require("fs")
+        let pathStr = Editor.Project.path+"/assets/resources/Path/path_test.txt"
+        fs.writeFile(pathStr,str,{flag:'w'},(error)=>{
+            console.error("write path success!!!!!!! ",error)
+        })
+        console.error(this.passPoints)
+    }
+
+    /**
+     * 是否是路径上最后一个点
+     * @param index 
+     * @returns 
+     */
+    public isFinalPoint(index):boolean{
+        return index >= this.passPoints.length-1
     }
 
     /**
