@@ -54,9 +54,12 @@ export class CustomPath extends Component {
     /**
      * 线段信息
      */
-    @property(Array(CustomLine))
-    customLines = new Array<CustomLine>()
 
+    customLines = new Array<CustomLine>()
+    @property(Array(CustomLine))
+    public get CustomLines(){
+        return this.customLines
+    }
 
     graphic:Graphics
     uiTrans:UITransform
@@ -76,6 +79,7 @@ export class CustomPath extends Component {
 
     onEnable(){
         this._drawAllLines()
+        this.GetPassPoints()
     }
 
     onDestroy(){
@@ -121,6 +125,10 @@ export class CustomPath extends Component {
      * 初始化线段
      */
     initLines(){
+        if (this.graphic == null){
+            this.graphic = this.node.getComponent(Graphics)
+            this.uiTrans = this.getComponent(UITransform)
+        }
         var lineCount = 0
         if (this.points.length>=2){
             var lastPointNode:Node,lastCtrlNode:Node          
@@ -199,8 +207,10 @@ export class CustomPath extends Component {
      * @returns 
      */
     public GetPassPoints(){
+        this.passPoints = new Array<Vec3>()
         this.customLines.forEach((line)=>{
             if (line.passPoints!=null){
+                line.CreateBezierPoints(this.uiTrans,10,this.graphic)
                 this.passPoints = this.passPoints.concat(line.passPoints)
                 console.error("PassPoints  ",line.passPoints,line.passPoints.length)
             }

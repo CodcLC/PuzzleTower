@@ -1,261 +1,111 @@
-import { getEmptyObject, notifyError } from './utils';
-
-
 /**
- * @constant EMPTY_OBJECT an empty object, to avoid unnecessary garbage when creating new pools
- */
-const EMPTY_OBJECT = {};
-
-/**
- * @var timeBasis the relative time basis to include in the id (incremented as counter)
- */
-let timeBasis = Date.now() % 1e9;
-
-/**
- * @class Nage
+ * Created by rockyl on 16/3/9.
  *
- * @classdesc pool objects, generating new ones only when necessary
+ * ObjectPool
  */
-class ObjectPool<Pooled extends {} = pool.Entry> {
-  protected _entries: WeakMap<Pooled, string>;
-  protected _generated: number;
-  protected _id: string;
-  protected _stack: Pooled[];
 
-  readonly create: pool.Options<Pooled>['create'];
-  readonly initialSize: pool.Options<Pooled>['initialSize'];
-  readonly maxSize: pool.Options<Pooled>['maxSize'];
-  readonly name: pool.Options<Pooled>['name'];
-  readonly onRelease: pool.Options<Pooled>['onRelease'];
-  readonly onReserve: pool.Options<Pooled>['onReserve'];
-  readonly onReset: pool.Options<Pooled>['onReset'];
+const recycleField = '__recycling'
 
-  /**
-   * @constructor
-   *
-   * @param [options] the options passed
-   * @param [options.create=getEmptyObject] the method to create new pool entries
-   * @param [options.onRelease] the function to call when releasing an entry back to the pool
-   * @param [options.onReserve] the function to call when reserving an entry from the pool
-   * @returns the pool
-   */
-  constructor({
-    create = getEmptyObject,
-    initialSize = 1,
-    maxSize = Infinity,
-    name,
-    onRelease,
-    onReserve,
-    onReset,
-  }: pool.Options<Pooled> = EMPTY_OBJECT) {
-    this._entries = new WeakMap<Pooled, string>();
-    this._id = `nage_${timeBasis++}_${(Math.random() * 1e9) >>> 0}`;
-    this._stack = [];
-    this._generated = 0;
+export function useObjectPool<T>(factoryMethod: (...params) => T, options: {
+	                                 initializationMethod?: (instance: T, ...params) => void,
+	                                 recycleMethod?: (instance: T) => void,
+	                                 disposeMethod?: (instance: T, ...params) => void,
+	                                 preInstantiationQuantity?: number,
+	                                 limit?: number,
+                                 } = {}
+): [(...params) => T, (instance: T | T[]) => void, () => void] {
+	const {
+		initializationMethod,
+		recycleMethod,
+		disposeMethod,
+		preInstantiationQuantity = 0,
+		limit = 0,
+	} = options
 
-    if (typeof create !== 'function') {
-      throw new Error('create must be a function');
-    }
+	if (!factoryMethod) {
+		console.warn('Please provide factory method')
+		return
+	}
 
-    this.create = create;
+	const pool: T[] = []
 
-    if (onRelease) {
-      if (typeof onRelease === 'function') {
-        this.onRelease = onRelease;
-      } else {
-        notifyError('onRelease must be a function');
-      }
-    }
+	if (preInstantiationQuantity > 0) {
+		for (let i = 0; i < preInstantiationQuantity; i++) {
+			pool.push(factoryMethod.apply(null))
+		}
+	}
 
-    if (onReserve) {
-      if (typeof onReserve === 'function') {
-        this.onReserve = onReserve;
-      } else {
-        notifyError('onReserve must be a function');
-      }
-    }
+	function _recycle(instance: T) {
+		if (instance[recycleField]) {
+			console.warn('The instance has been recycled')
+			return
+		}
 
-    if (onReset) {
-      if (typeof onReset === 'function') {
-        this.onReset = onReset;
-      } else {
-        notifyError('onReset must be a function');
-      }
-    }
+		recycleMethod && recycleMethod(instance)
 
-    const computedInitialSize = Math.min(initialSize, maxSize);
+		if (limit > 0 && pool.length >= limit) {
+			return
+		}
 
-    this.initialSize = computedInitialSize;
-    this.maxSize = maxSize;
+		_disposeInstance(instance)
+		Object.defineProperty(instance, recycleField, {
+			get() {
+				return true
+			},
+			configurable: true,
+		})
+		pool.push(instance)
+	}
 
-    if (computedInitialSize) {
-      const { _stack: stack } = this;
+	function _disposeInstance(instance: T) {
+		disposeMethod && disposeMethod(instance)
+	}
 
-      for (let index = 0; index < computedInitialSize; ++index) {
-        stack.push(this._generate());
-      }
-    }
+	/**
+	 * create an instance
+	 * @param params  any params
+	 */
+	function getInstance(...params): T {
+		let instance: T
+		if (pool.length == 0) {
+			instance = factoryMethod.apply(null, params)
+		} else {
+			instance = pool.pop()
+		}
+		const args = params.concat()
+		args.unshift(instance)
+		initializationMethod && initializationMethod.apply(null, args)
+		Object.defineProperty(instance, recycleField, {
+			get() {
+				return false
+			},
+			configurable: true,
+		})
+		return instance
+	}
 
-    this.name = name;
-  }
+	/**
+	 * recycle an instance
+	 * @param instance
+	 */
+	function recycleInstance(instance: T | T[]) {
+		if (Array.isArray(instance)) {
+			for (let item of instance) {
+				_recycle(item)
+			}
+		} else {
+			_recycle(instance)
+		}
+	}
 
-  /**
-   * @instance
-   * @var available the number of items in the pool available for reservation
-   */
-  get available() {
-    return this._stack.length;
-  }
+	/**
+	 * clean all instances in pool
+	 */
+	function clean() {
+		while (pool.length > 0) {
+			_disposeInstance(pool.pop())
+		}
+	}
 
-  /**
-   * @instance
-   * @var reserved the number of items in the pool currently reserved
-   */
-  get reserved() {
-    return this._generated - this._stack.length;
-  }
-
-  /**
-   * @instance
-   * @var size the total number of items in the pool, both reserved and available
-   */
-  get size() {
-    return this._generated;
-  }
-
-  /**
-   * @instance
-   * @function _generate
-   *
-   * @description
-   * create a new pool entry and add it to the list of _entries
-   *
-   * @returns a new entry
-   */
-  _generate() {
-    const entry = this.create();
-
-    this._entries.set(entry, this._id);
-
-    ++this._generated;
-
-    return entry;
-  }
-
-  /**
-   * @instance
-   * @function release
-   *
-   * @description
-   * return the entry passed to the pool if not already present
-   *
-   * @throws if the entry is not part of the original pool
-   *
-   * @param entry the entry to release back to the pool
-   */
-  release(entry: Pooled) {
-    if (this._entries.get(entry) !== this._id) {
-      return notifyError('Object passed is not part of this pool.');
-    }
-
-    const { onRelease, _stack: stack } = this;
-
-    if (stack.length < this.maxSize && stack.indexOf(entry) === -1) {
-      if (onRelease) {
-        onRelease(entry);
-      }
-
-      stack.push(entry);
-    }
-  }
-
-  /**
-   * @instance
-   * @function releaseN
-   *
-   * @description
-   * return the entries passed to the pool if not already present
-   *
-   * @param entries the entries to release back to the pool
-   */
-  releaseN(entries: Pooled[]) {
-    entries.forEach((entry) => this.release(entry));
-  }
-
-  /**
-   * @instance
-   * @function reserve
-   *
-   * @description
-   * get either an existing entry, or a newly-_generated one
-   *
-   * @param numberOfEntries the number of _entries to reserve
-   * @returns a pool entry
-   */
-  reserve(): Pooled {
-    const { onReserve, _stack: stack } = this;
-
-    const reserved = stack.length ? stack.pop() : this._generate();
-
-    if (onReserve) {
-      onReserve(reserved);
-    }
-
-    return reserved;
-  }
-
-  /**
-   * @instance
-   * @function reserveN
-   *
-   * @description
-   * get reserve multiple entries from the pool
-   *
-   * @param size the number of entries to reserve
-   * @returns an array of pool entries
-   */
-  reserveN(size: number): Pooled[] {
-    const reservations = new Array(size);
-
-    for (let index = 0; index < size; ++index) {
-      reservations[index] = this.reserve();
-    }
-
-    return reservations;
-  }
-
-  /**
-   * @instance
-   * @function reset
-   *
-   * @description
-   * reset the _stack of pool items to initial state
-   */
-  reset() {
-    const { initialSize, onReset, _stack: stack } = this;
-
-    if (onReset) {
-      onReset(stack);
-    }
-
-    const { length } = stack;
-
-    if (length) {
-      const { _entries: entries } = this;
-
-      for (let index = 0; index < length; ++index) {
-        entries.delete(stack[index]);
-      }
-
-      stack.length = 0;
-    }
-
-    this._generated = 0;
-
-    for (let index = 0; index < initialSize; ++index) {
-      stack.push(this._generate());
-    }
-  }
+	return [getInstance, recycleInstance, clean]
 }
-
-export default ObjectPool;

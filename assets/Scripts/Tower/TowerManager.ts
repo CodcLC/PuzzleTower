@@ -73,6 +73,7 @@ export class TowerManager extends Component {
         let baseTower = towerInstance.getComponent(BaseTower);
         this.baseId+=1;
         baseTower.id = this.baseId;
+        baseTower.Type = type
         this.node.addChild(towerInstance);
         baseTower.Tile = tile
         return towerInstance

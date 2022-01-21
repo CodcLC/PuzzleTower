@@ -6,8 +6,8 @@
   "creator": {
     "version": "3.3.2"
   },
-
-  "devDependencies": {
+  "devDependencies": {},
+  "dependencies": {
     "@types/node": "^17.0.10"
   }
 }

@@ -72,7 +72,7 @@
      * @param graphics 
      * @returns 
      */
-    public CreateBezierPoints(uiTrans,pointsAmount:number,graphics)
+    public CreateBezierPoints(uiTrans:UITransform,pointsAmount:number,graphics)
     {
         this.passPoints = []
         let startPos = uiTrans.convertToNodeSpaceAR(this.startNode.worldPosition)
@@ -95,7 +95,8 @@
                 graphics.moveTo(point.x,point.y)
                 
             }
-            this.passPoints.push(point);
+            let worldPos = uiTrans.convertToWorldSpaceAR(point)
+            this.passPoints.push( worldPos);
         }
         
         return this.passPoints;

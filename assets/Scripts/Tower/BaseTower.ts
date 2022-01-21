@@ -7,8 +7,15 @@
  * @FilePath: \PuzzleTower\assets\Scripts\Battle\BaseTower.ts
  */
 
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Node, Graphics, Color, math, Tween, tween,macro, instantiate, NodePool, Prefab, resources } from 'cc';
+import { create } from 'domain';
+import { Global } from '../Global';
+import ObjectPool from '../Public/ObjectPool/ObjectPool';
+import { BaseMonster } from './BaseMonster';
+import { Bullet } from './Bullet';
 import { MapTile } from './Map/MapTile';
+import { TowerType } from './TowerDefines';
+import { getPathByBulletType } from './TowerUtils';
 const { ccclass, property } = _decorator;
 /**
  * Predefined variables
@@ -26,6 +33,16 @@ const { ccclass, property } = _decorator;
 export class BaseTower extends Component { 
 
     public id = 0;
+
+    //类型
+    private type:TowerType;
+    public get Type() {
+        return this.type;
+    }
+    public set Type(value) {
+        this.type = value;
+        console.error("setType",this.type)
+    }
 
     //血量
     @property({type:0})
@@ -69,8 +86,8 @@ export class BaseTower extends Component {
     }
 
     //射程
+    private atkRange = 200;
     @property
-    private atkRange = 0;
     public get AtkRange() {
         return this.atkRange;
     }
@@ -88,22 +105,92 @@ export class BaseTower extends Component {
         this.node.setWorldPosition(this.tile.node.worldPosition)
     }
 
+    atkMonster:BaseMonster
+
+    graphic:Graphics
+    atkSchedule = null
+
+    bulletPrefab:Prefab
+    bulletPool:ObjectPool
 
     onLoad(){
-        console.error("load")
     }
 
     start () {
-        // [3]
-        console.error("start")
+        //绘制攻击范围
+        this.graphic = this.getComponent(Graphics)
+        let color = new Color("#95CACA")
+        this.graphic.strokeColor = color
+        this.graphic.lineWidth = 5
+        this.graphic.circle(0,0,this.atkRange)
+        this.graphic.stroke()
 
+        this.bulletPool = new NodePool()
     }
 
-    
 
-    // update (deltaTime: number) {
-    //     // [4]
-    // }
+    checkMonstersPosition(){
+        let towerPosition = this.node.worldPosition
+        let monsters = Global.Instance<Global>().monsterManager.monsterObjects
+        let atkMonster,minDistance:number
+        monsters.forEach((monster)=>{
+            let monsterPos = monster.node.worldPosition
+            let distance = Math.sqrt(Math.pow(monsterPos.x-towerPosition.x,2)+Math.pow(monsterPos.y-towerPosition.y,2))
+            if ((atkMonster==null && distance<this.AtkRange) || distance<minDistance){
+                atkMonster = monster
+                minDistance = distance
+            }
+        })
+        if (atkMonster!=null && this.atkMonster!=atkMonster){
+            console.log("攻击范围内有怪物")
+            this.atkMonster = atkMonster
+            return true
+        }
+        return false
+    }
+    
+    resetAtkTarget(){
+        if(this.atkSchedule != null){
+            this.unschedule(this.atkSchedule)
+        }
+        this.atkSchedule = this.schedule(()=>{this.atkAction()},1,macro.REPEAT_FOREVER)
+    }
+
+    atkAction(){
+        let bulletPath = getPathByBulletType(this.Type)
+        if (this.bulletPrefab==null){
+            resources.load(bulletPath.valueOf(),Prefab,(error,bulletPrefab)=>{
+                this.bulletPrefab = bulletPrefab
+                this.createBulletInstance()
+            })
+        }else{
+            this.createBulletInstance()
+        }
+       
+    }
+
+    createBulletInstance(){
+        if (this.bulletPrefab == null) {
+            return
+        }
+        console.log("发射子弹")
+        let bulletInstance
+        if (this.bulletPool.size() > 0) {
+            bulletInstance = this.bulletPool.get();
+        } else {
+            bulletInstance = instantiate(this.bulletPrefab);
+        }
+        let bullet:Bullet = bulletInstance.getComponent(Bullet)
+        bullet.Init({damage:1,target:this.atkMonster.node})
+        bulletInstance.setParent(this.node)
+        bullet.action()
+    }
+
+    update (deltaTime: number) {
+        if(this.checkMonstersPosition()==true){
+            this.resetAtkTarget()
+        }
+    }
 }
 
 /**

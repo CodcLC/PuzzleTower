@@ -59,7 +59,7 @@ export class MonsterManager extends Component {
     /**实例化塔 */
     private _instantialMonster(type:MonsterType,position:Vec3):BaseMonster{
         if (!this.monsterPrefabs.has(type)) {
-            console.log("没有加载成功类型{0}塔预制体！".format(type))
+            console.log("没有加载成功类型{0}怪物预制体！".format(type))
             return
         }
         var monsterPrefab = this.monsterPrefabs.get(type)
@@ -68,7 +68,7 @@ export class MonsterManager extends Component {
         this.baseId+=1;
         baseMonster.id = this.baseId;
         this.monsterObjects.set(baseMonster.id,baseMonster)
-        this.node.addChild(towerInstance);
+        towerInstance.setParent(this.node)
         return baseMonster
     }
 }

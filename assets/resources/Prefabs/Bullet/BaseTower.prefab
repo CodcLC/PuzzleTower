@@ -12,7 +12,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Test",
+    "_name": "BaseTower",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -72,8 +72,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 96,
-      "height": 96
+      "width": 31,
+      "height": 31
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -84,7 +84,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "a5h+4FIolC3ZZCjhHtrQdv"
+    "fileId": "048qia08JEhKFT50+nUD34"
   },
   {
     "__type__": "cc.Sprite",
@@ -109,7 +109,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "88f5fae1-5178-4788-9aa0-6884e5ab5ced@f9941",
+      "__uuid__": "24c419ea-63a8-4ea1-a9d0-7fc469489bbc@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -129,10 +129,10 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "3fUKXnmUlEbr9eZ9W2A8EY"
+    "fileId": "85QSexzkJHtKW7oNEv2tCW"
   },
   {
-    "__type__": "754baFevIpIDKleB9cZ03sb",
+    "__type__": "c94d4LMeUhETY7jG4/1IhLz",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -142,13 +142,13 @@
     "__prefab": {
       "__id__": 7
     },
-    "hp": 100,
+    "damage": 0,
     "speed": 0,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "ecY0+EMNxLOYCD28DqxHlX"
+    "fileId": "3bICiS7k1DK5Bg0nHzqUpo"
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -158,6 +158,6 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "080+jw48NN75W8+wWOQ7cX"
+    "fileId": "55AZ8ju/JHvLOWYoJdXUEu"
   }
 ]

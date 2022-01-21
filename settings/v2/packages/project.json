@@ -5,5 +5,11 @@
       "width": 720,
       "height": 1208
     }
-  }
+  },
+  "layer": [
+    {
+      "name": "Tower",
+      "value": 1
+    }
+  ]
 }

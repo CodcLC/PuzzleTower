@@ -35,7 +35,7 @@ export class Bullet extends Component {
 
     /**目标节点 */
     @property({type:Node})
-    target;
+    target:Node;
 
     start () {
 
@@ -49,7 +49,7 @@ export class Bullet extends Component {
     /**
      * 设置数据
      */
-    Init({damage = 0,targetPos,target}){
+    Init({damage = 0,targetPos=null,target}){
         this.damage = damage;
         this.targetPos = targetPos;
         this.target = target;
@@ -57,7 +57,7 @@ export class Bullet extends Component {
 
     public action () {
         tween(this.node)
-        .to(1,{position: this.target??this.targetPos})
+        .to(1,{worldPosition: this.target?this.target.worldPosition:this.targetPos})
         .call(this.reach)
         .start()
     }

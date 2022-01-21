@@ -47,5 +47,9 @@ export enum MonsterType{
 export const TowerPath = "Prefabs/Tower/{0}"
 //怪物路径
 export const MonsterPath = "Prefabs/Monster/{0}"
+
+//子弹路径
+export const BulletPath = "Prefabs/Bullet/{0}"
+
 //TowerItem预制体地址
 export const UITowerItemPath = "Prefabs/Tower/UI/UITowerItem.prefab"

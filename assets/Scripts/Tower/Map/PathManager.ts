@@ -1,6 +1,6 @@
-/// <reference types='@types/node' />
-import { _decorator, Component, Node, Vec3 } from 'cc';
-import * as fs from 'fs';
+// /// <reference types='@types/node' />
+import { _decorator, Component, Node, Vec3, resources, TextAsset } from 'cc';
+import { table } from 'console';
 const { ccclass, property } = _decorator;
 
 /**
@@ -17,22 +17,42 @@ const { ccclass, property } = _decorator;
  
 @ccclass('PathManager')
 export class PathManager extends Component {
+    
+    public points:Array<Vec3> = new Array<Vec3>()
 
-    points:Vec3[]
-
-    start () {
+    onLoad () {
         // [3]
         this.loadPath()
     }
 
 
     loadPath(){
-
-        let fs = require('fs')
-        let pathStr = Editor.Project.path+"/assets/resources/Path/path_test.txt"
-        fs.readFile(pathStr,{flag:'w'},(error,str)=>{
-            console.error("read path success!!!!!!! ",str)
+        // let fs = require('fs')
+        let pathStr = "Path/path_test"
+        resources.load(pathStr,(error,file:TextAsset)=>{
+            if (file.text==""){
+                return
+            }
+            var posArray = file.text.split("|")
+            posArray.forEach((posStr)=>{
+                let posInfo = posStr.split(' ')
+                let pos:Vec3 = new Vec3(Number(posInfo[0]),Number(posInfo[1]),Number(posInfo[2]))
+                this.points.push(pos)
+            })            
         })
+        // jsb.fileUtils.getStringFromFile(pathStr)
+        // fs.readFile(pathStr,{flag:'w'},(error,str)=>{
+        //     console.error("read path success!!!!!!! ",str)
+        // })
+    }
+
+        /**
+     * 是否是路径上最后一个点
+     * @param index 
+     * @returns 
+     */
+    public isFinalPoint(index):boolean{
+        return index >= this.points.length-1
     }
 }
 

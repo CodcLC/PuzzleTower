@@ -13,6 +13,7 @@ import { UIDragPanel } from './UI/UIDragPanel';
 import { TowerManager } from './Tower/TowerManager';
 import { MonsterManager } from './Tower/MonsterManager';
 import { CustomPath } from './Public/CustomPath/CustomPath';
+import { PathManager } from './Tower/Map/PathManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Global')
@@ -37,8 +38,8 @@ export class Global extends CSingleton<Global>{
     monsterManager:MonsterManager
 
     //路径信息
-    @property(CustomPath)
-    path:CustomPath
+    @property(PathManager)
+    path:PathManager
 
     @property({type:UIDragPanel})
     uiDragPanel:UIDragPanel

@@ -49,6 +49,7 @@ export class BaseMonster extends Component {
         this.speed = value;
     }
 
+
     private pathPointIndex = 0
     private tween
 
@@ -76,12 +77,11 @@ export class BaseMonster extends Component {
             return
         }
         let path = Global.Instance<Global>().path
-        let pathPoint = path.PassPoints[this.pathPointIndex]
-        console.error(pathPoint)
+        let pathPoint = path.points[this.pathPointIndex]
         this.tween = tween(this.node)
-        .to(1,{position:pathPoint})
+        .to(1,{worldPosition:pathPoint})
         .call(()=>{
-            console.error("到达 ",pathPoint)
+            // console.error("到达 ",pathPoint)
             this.checkMove()
         })
         .start()
