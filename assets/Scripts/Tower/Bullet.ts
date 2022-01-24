@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node, Vec3, tween } from 'cc';
+import { _decorator, Component, Node, Vec3, tween, Tween } from 'cc';
 const { ccclass, property } = _decorator;
 
 /**
@@ -22,12 +22,11 @@ export class Bullet extends Component {
     damage = 0;
 
     /**速度 */
-    @property
-    speed = 0;
+    speed:number = 1;
 
     /** 发射子弹单位 */
     @property({type:Node})
-    owner;
+    owner:Node;
 
     /**目标位置*/
     @property({type:Vec3,group:"header"})
@@ -37,33 +36,62 @@ export class Bullet extends Component {
     @property({type:Node})
     target:Node;
 
+
+    completeFunc:Function
+    completeFuncCaller:Object
+
+    //是否动画
+    canAnim:boolean = false
+
+    tweenObject:Tween<Node>
+
     start () {
 
         // [3]
     }
 
-    // update (deltaTime: number) {
-    //     // [4]
-    // }
+    update (deltaTime: number) {
+        // [4]
+        if (this.canAnim == false){
+            return
+        }
+        let offset:Vec3 = new Vec3()
+        Vec3.subtract(offset,this.target.worldPosition,this.node.worldPosition)
+        
+        if(offset.length()<1){
+            console.log("击中目标")
+            this.stopAction()
+            this.completeFunc.call(this.completeFuncCaller,this)
+        }else{
+            let dirNomalizeOffset:Vec3 = offset.normalize()
+            let moveOffset = dirNomalizeOffset.multiplyScalar(this.speed*100*deltaTime)
+            this.node.setWorldPosition(this.node.worldPosition.add(moveOffset))
+        }
+            // this.tweenObject = tween(this.node)
+            // .to(1,{worldPosition: this.target?this.target.worldPosition:this.targetPos})
+            // .call(()=>{this.completeFunc.call(this.completeFuncCaller,this)})
+            // .start()
+    }
 
     /**
      * 设置数据
      */
-    Init({damage = 0,targetPos=null,target}){
+    Init({owner = null, damage = 0,targetPos=null,target}){
+        this.owner = owner
         this.damage = damage;
         this.targetPos = targetPos;
         this.target = target;
     }
 
-    public action () {
-        tween(this.node)
-        .to(1,{worldPosition: this.target?this.target.worldPosition:this.targetPos})
-        .call(this.reach)
-        .start()
+    public action (callBack:Function,caller:Object) {
+        this.completeFunc = callBack
+        this.completeFuncCaller = caller
+        this.canAnim = true
+        this.node.setWorldPosition(this.owner.worldPosition)
     }
 
-    reach (){
-        console.log("命中目标！")
+    public stopAction(){
+        this.canAnim = false
     }
 }
 

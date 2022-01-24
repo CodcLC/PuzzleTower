@@ -65,7 +65,6 @@ export class CustomPath extends Component {
     uiTrans:UITransform
 
     start () {
-        console.error("start")
         this.graphic = this.node.getComponent(Graphics)
         this.uiTrans = this.graphic.getComponent(UITransform)
 
@@ -225,9 +224,9 @@ export class CustomPath extends Component {
         let fs = require("fs")
         let pathStr = Editor.Project.path+"/assets/resources/Path/path_test.txt"
         fs.writeFile(pathStr,str,{flag:'w'},(error)=>{
-            console.error("write path success!!!!!!! ",error)
+            console.error("write path finish!!!!!!! ",error)
+            console.error(this.passPoints)
         })
-        console.error(this.passPoints)
     }
 
     /**

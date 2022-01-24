@@ -54,12 +54,10 @@ export class BaseMonster extends Component {
     private tween
 
     onLoad(){
-        console.error("load")
     }
 
     start () {
         // [3]
-        console.error("start")
 
     }
 

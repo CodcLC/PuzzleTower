@@ -68,7 +68,7 @@ export class UITowerItem extends Component {
 
 
     onTouchMove(touchEvent){
-        console.error("touchMove")
+        // console.error("touchMove")
         let global:Global = Global.Instance<Global>()
         if (!global.uiDragPanel.dragging){
             global.uiDragPanel.startDragTower(this.towerType)

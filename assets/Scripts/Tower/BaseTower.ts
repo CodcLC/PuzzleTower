@@ -10,7 +10,6 @@
 import { _decorator, Component, Node, Graphics, Color, math, Tween, tween,macro, instantiate, NodePool, Prefab, resources } from 'cc';
 import { create } from 'domain';
 import { Global } from '../Global';
-import ObjectPool from '../Public/ObjectPool/ObjectPool';
 import { BaseMonster } from './BaseMonster';
 import { Bullet } from './Bullet';
 import { MapTile } from './Map/MapTile';
@@ -29,6 +28,12 @@ const { ccclass, property } = _decorator;
  *
  */
  
+ enum CheckMonsterResult{
+    No,
+    Same,
+    Different
+}
+
 @ccclass('BaseTower')
 export class BaseTower extends Component { 
 
@@ -41,7 +46,6 @@ export class BaseTower extends Component {
     }
     public set Type(value) {
         this.type = value;
-        console.error("setType",this.type)
     }
 
     //血量
@@ -111,7 +115,9 @@ export class BaseTower extends Component {
     atkSchedule = null
 
     bulletPrefab:Prefab
-    bulletPool:ObjectPool
+    bulletPool:NodePool
+
+    atking:boolean = false
 
     onLoad(){
     }
@@ -129,6 +135,7 @@ export class BaseTower extends Component {
     }
 
 
+
     checkMonstersPosition(){
         let towerPosition = this.node.worldPosition
         let monsters = Global.Instance<Global>().monsterManager.monsterObjects
@@ -141,22 +148,35 @@ export class BaseTower extends Component {
                 minDistance = distance
             }
         })
-        if (atkMonster!=null && this.atkMonster!=atkMonster){
-            console.log("攻击范围内有怪物")
+        if (atkMonster == null){
+            console.log("攻击范围内无怪物")
+            this.atkMonster = null
+            return CheckMonsterResult.No
+        }else if(this.atkMonster!=atkMonster){
+            console.log("攻击范围内有新的怪物 ",this.atkMonster,atkMonster)
             this.atkMonster = atkMonster
-            return true
+            return CheckMonsterResult.Different
+        }else{
+            return CheckMonsterResult.Same
         }
-        return false
     }
     
-    resetAtkTarget(){
+    /**
+     * 开始攻击
+     */
+    startAtk(){
         if(this.atkSchedule != null){
             this.unschedule(this.atkSchedule)
         }
         this.atkSchedule = this.schedule(()=>{this.atkAction()},1,macro.REPEAT_FOREVER)
+        this.atking = true
     }
 
+    //攻击动作
     atkAction(){
+        if (this.atkMonster == null){
+            return
+        }
         let bulletPath = getPathByBulletType(this.Type)
         if (this.bulletPrefab==null){
             resources.load(bulletPath.valueOf(),Prefab,(error,bulletPrefab)=>{
@@ -167,6 +187,17 @@ export class BaseTower extends Component {
             this.createBulletInstance()
         }
        
+    }
+
+    /**
+     * 停止攻击
+     */
+    stopAtk(){
+        if(this.atkSchedule!=null){
+            this.unschedule(this.atkSchedule)
+            this.atkSchedule = null
+        }
+        this.atking = false
     }
 
     createBulletInstance(){
@@ -181,15 +212,24 @@ export class BaseTower extends Component {
             bulletInstance = instantiate(this.bulletPrefab);
         }
         let bullet:Bullet = bulletInstance.getComponent(Bullet)
-        bullet.Init({damage:1,target:this.atkMonster.node})
+        bullet.Init({owner:this.node, damage:1,target:this.atkMonster.node})
         bulletInstance.setParent(this.node)
-        bullet.action()
+        bullet.action(this.reclaimBullet,this)
     }
 
     update (deltaTime: number) {
-        if(this.checkMonstersPosition()==true){
-            this.resetAtkTarget()
+        let chectResult = this.checkMonstersPosition()
+        if(chectResult == CheckMonsterResult.Different){
+            this.startAtk()
+        }else if (chectResult == CheckMonsterResult.No){
+            this.stopAtk()
+        }else{
+            
         }
+    }
+
+    public reclaimBullet(bullet:Bullet){
+        this.bulletPool.put(bullet.node)
     }
 }
 
