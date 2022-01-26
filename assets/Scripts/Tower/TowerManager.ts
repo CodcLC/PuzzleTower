@@ -8,8 +8,8 @@
  */
 
 import { _decorator, Component, Node, instantiate, loader, resources, Prefab, Asset } from 'cc';
-import { BaseTower } from './BaseTower';
-import { TowerPath, TowerType } from './TowerDefines';
+import { BaseTower } from './Tower/BaseTower';
+import { TowerPath, TowerState, TowerType } from './TowerDefines';
 import { getPathByTowerType } from './TowerUtils';
 import { MapTile } from './Map/MapTile';
 const { ccclass, property } = _decorator;
@@ -74,6 +74,7 @@ export class TowerManager extends Component {
         this.baseId+=1;
         baseTower.id = this.baseId;
         baseTower.Type = type
+        baseTower.state = TowerState.Normal
         this.node.addChild(towerInstance);
         baseTower.Tile = tile
         return towerInstance

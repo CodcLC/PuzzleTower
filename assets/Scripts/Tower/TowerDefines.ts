@@ -7,7 +7,9 @@
  * @FilePath: \PuzzleTower\assets\Scripts\Tower\TowerDefines.ts
  */
 import { CCObject, Component } from "cc";
-import { BaseTower } from "./BaseTower";
+import { BaseTower } from "./Tower/BaseTower";
+import { BulletTower } from './Tower/BulletTower';
+import { LaserTower as LaserTower } from './Tower/LaserTower';
 
 
 //塔类型
@@ -15,6 +17,13 @@ export enum TowerType {
     Circle,
     Square,
     Triangle,
+}
+
+export enum TowerState{
+    Disable,
+    Normal,
+    Attack,
+
 }
 
 //塔名字
@@ -26,14 +35,15 @@ export const TowerNameMap = new Map<TowerType,String>([
 
 //塔预制体
 export const TowerPrefabMap = new Map<TowerType,String>([
-    [TowerType.Circle,"BaseTower"],
-    [TowerType.Square,"BaseTower"],
+    [TowerType.Circle,"BulletTower"],
+    [TowerType.Square,"LaserTower"],
     [TowerType.Triangle,"BaseTower"],
 ]);
 
 //塔组件类
 export const TowerClassType = new Map<TowerType,Object>([
-    [TowerType.Circle,BaseTower],
+    [TowerType.Circle,BulletTower],
+    [TowerType.Square,LaserTower],
 ]);
 
 
@@ -50,6 +60,9 @@ export const MonsterPath = "Prefabs/Monster/{0}"
 
 //子弹路径
 export const BulletPath = "Prefabs/Bullet/{0}"
+
+//激光路径
+export const LaserPath = "Prefabs/Bullet/{0}"
 
 //TowerItem预制体地址
 export const UITowerItemPath = "Prefabs/Tower/UI/UITowerItem.prefab"

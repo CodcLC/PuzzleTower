@@ -9,12 +9,13 @@
 
 import { _decorator, Component, Node, Graphics, Color, math, Tween, tween,macro, instantiate, NodePool, Prefab, resources } from 'cc';
 import { create } from 'domain';
-import { Global } from '../Global';
-import { BaseMonster } from './BaseMonster';
-import { Bullet } from './Bullet';
-import { MapTile } from './Map/MapTile';
-import { TowerType } from './TowerDefines';
-import { getPathByBulletType } from './TowerUtils';
+import { TowerType, TowerState } from '../TowerDefines';
+import { MapTile } from '../Map/MapTile';
+import { BaseMonster } from '../BaseMonster';
+import { Global } from '../../Global';
+import { getPathByBulletType } from '../TowerUtils';
+import { Bullet } from '../Bullet';
+
 const { ccclass, property } = _decorator;
 /**
  * Predefined variables
@@ -109,15 +110,18 @@ export class BaseTower extends Component {
         this.node.setWorldPosition(this.tile.node.worldPosition)
     }
 
+    //状态
+    state:TowerState = TowerState.Disable
+
     atkMonster:BaseMonster
 
     graphic:Graphics
     atkSchedule = null
 
-    bulletPrefab:Prefab
+    laserPrefab:Prefab
     bulletPool:NodePool
 
-    atking:boolean = false
+    alert = false
 
     onLoad(){
     }
@@ -163,73 +167,46 @@ export class BaseTower extends Component {
     
     /**
      * 开始攻击
+     * @returns 
      */
     startAtk(){
-        if(this.atkSchedule != null){
-            this.unschedule(this.atkSchedule)
-        }
-        this.atkSchedule = this.schedule(()=>{this.atkAction()},1,macro.REPEAT_FOREVER)
-        this.atking = true
+        console.error("开始攻击")
+        this.state = TowerState.Attack
     }
 
-    //攻击动作
-    atkAction(){
-        if (this.atkMonster == null){
-            return
-        }
-        let bulletPath = getPathByBulletType(this.Type)
-        if (this.bulletPrefab==null){
-            resources.load(bulletPath.valueOf(),Prefab,(error,bulletPrefab)=>{
-                this.bulletPrefab = bulletPrefab
-                this.createBulletInstance()
-            })
-        }else{
-            this.createBulletInstance()
-        }
+    /**
+     * 结束攻击
+     * @returns 
+     */
+    stopAtk(){
+        console.error("结束攻击")
+        this.state = TowerState.Normal
+
+    }
+  
+   
+
+    update (deltaTime: number) {
        
     }
 
     /**
-     * 停止攻击
+     * 正常的攻击表现
+     * @param tower 
      */
-    stopAtk(){
-        if(this.atkSchedule!=null){
-            this.unschedule(this.atkSchedule)
-            this.atkSchedule = null
-        }
-        this.atking = false
-    }
-
-    createBulletInstance(){
-        if (this.bulletPrefab == null) {
+    NormalBehavior(tower:BaseTower) {
+        if (this.state == TowerState.Disable){
             return
         }
-        console.log("发射子弹")
-        let bulletInstance
-        if (this.bulletPool.size() > 0) {
-            bulletInstance = this.bulletPool.get();
-        } else {
-            bulletInstance = instantiate(this.bulletPrefab);
-        }
-        let bullet:Bullet = bulletInstance.getComponent(Bullet)
-        bullet.Init({owner:this.node, damage:1,target:this.atkMonster.node})
-        bulletInstance.setParent(this.node)
-        bullet.action(this.reclaimBullet,this)
-    }
-
-    update (deltaTime: number) {
         let chectResult = this.checkMonstersPosition()
         if(chectResult == CheckMonsterResult.Different){
-            this.startAtk()
-        }else if (chectResult == CheckMonsterResult.No){
-            this.stopAtk()
+            tower.stopAtk()
+            tower.startAtk()
+        }else if (chectResult == CheckMonsterResult.No && this.state == TowerState.Attack){
+            tower.stopAtk()
         }else{
-            
-        }
-    }
 
-    public reclaimBullet(bullet:Bullet){
-        this.bulletPool.put(bullet.node)
+        }
     }
 }
 
