@@ -10,6 +10,10 @@
     {
       "name": "Tower",
       "value": 1
+    },
+    {
+      "name": "Line",
+      "value": 2
     }
   ]
 }

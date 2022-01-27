@@ -10,6 +10,9 @@
 import { _decorator, Component, Node, Tween, tween } from 'cc';
 import { Global } from '../Global';
 import { MapTile } from './Map/MapTile';
+import { BaseBenefit } from './Benefit/BaseBenefit';
+import { BaseObject } from './BaseObject';
+import { BenefitType } from './TowerDefines';
 const { ccclass, property } = _decorator;
 /**
  * Predefined variables
@@ -24,7 +27,7 @@ const { ccclass, property } = _decorator;
  */
  
 @ccclass('BaseMonster')
-export class BaseMonster extends Component { 
+export class BaseMonster extends BaseObject { 
 
     public id = 0;
 
@@ -41,9 +44,9 @@ export class BaseMonster extends Component {
 
     //移动速度
     @property
-    private speed = 0;
+    private speed = 100;
     public get Speed() {
-        return this.speed;
+        return this.speed + this.getBenefitValueByType(BenefitType.Speed);
     }
     public set Speed(value) {
         this.speed = value;
@@ -77,12 +80,13 @@ export class BaseMonster extends Component {
         let path = Global.Instance<Global>().path
         let pathPoint = path.points[this.pathPointIndex]
         this.tween = tween(this.node)
-        .to(1,{worldPosition:pathPoint})
+        .to(1*100/this.Speed,{worldPosition:pathPoint})
         .call(()=>{
             // console.error("到达 ",pathPoint)
             this.checkMove()
         })
         .start()
+        console.error("speed!!!!!! ",this.Speed)
     }
 
     

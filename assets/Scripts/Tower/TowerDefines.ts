@@ -10,6 +10,7 @@ import { CCObject, Component } from "cc";
 import { BaseTower } from "./Tower/BaseTower";
 import { BulletTower } from './Tower/BulletTower';
 import { LaserTower as LaserTower } from './Tower/LaserTower';
+import { BenefitTower } from './Tower/BenefitTower';
 
 
 //塔类型
@@ -26,6 +27,11 @@ export enum TowerState{
 
 }
 
+export enum BenefitType{
+    None,
+    Speed,
+}
+
 //塔名字
 export const TowerNameMap = new Map<TowerType,String>([
     [TowerType.Circle,"圆塔"],
@@ -37,13 +43,14 @@ export const TowerNameMap = new Map<TowerType,String>([
 export const TowerPrefabMap = new Map<TowerType,String>([
     [TowerType.Circle,"BulletTower"],
     [TowerType.Square,"LaserTower"],
-    [TowerType.Triangle,"BaseTower"],
+    [TowerType.Triangle,"BenefitTower"],
 ]);
 
 //塔组件类
 export const TowerClassType = new Map<TowerType,Object>([
     [TowerType.Circle,BulletTower],
     [TowerType.Square,LaserTower],
+    [TowerType.Triangle,BenefitTower],
 ]);
 
 

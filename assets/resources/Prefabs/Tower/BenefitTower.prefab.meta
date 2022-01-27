@@ -2,12 +2,12 @@
   "ver": "1.1.35",
   "importer": "prefab",
   "imported": true,
-  "uuid": "fa961f89-919e-4f96-955d-4b0fb78f25bc",
+  "uuid": "06b8922f-0bf1-4905-9a3c-23a58afb0ebf",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "LaserTower"
+    "syncNodeName": "BenefitTower"
   }
 }

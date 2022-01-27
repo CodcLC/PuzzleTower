@@ -1,7 +1,8 @@
 
-import { _decorator, Component, Node, resources, Prefab, instantiate, Vec3, LineComponent } from 'cc';
+import { _decorator, Component, Node, resources, Prefab, instantiate, Vec3, LineComponent, CurveRange, Line } from 'cc';
 import { BaseTower } from './BaseTower';
 import { getPathByBulletType } from '../TowerUtils';
+import { Global } from '../../Global';
 const { ccclass, property } = _decorator;
 
 /**
@@ -34,30 +35,39 @@ export class LaserTower extends BaseTower {
     update (deltaTime: number) {
         super.update(deltaTime)
         this.NormalBehavior(this)
+
+        if(this.laserInstance!=null && this.laserInstance.active == true){
+            this.updateLaserPosition()
+        }
     }
 
     startAtk(){
         super.startAtk()
         if (this.laserInstance!=null){
             this.laserInstance.active = true
-            this.initLaserInstance()
         }
         let bulletPath = getPathByBulletType(this.Type)
         console.error("laserpath ",bulletPath)
-        if (this.laserPrefab==null){
+        if (this.bulletPrefab==null){
             resources.load(bulletPath.valueOf(),Prefab,(error,bulletPrefab)=>{
-                this.laserPrefab = bulletPrefab
-                this.laserInstance = instantiate(this.laserPrefab)
+                this.bulletPrefab = bulletPrefab
+                console.error("this.laserInstance  ",this.laserInstance )
                 this.initLaserInstance()
             })
         }else{
-            this.laserInstance = instantiate(this.laserPrefab)
+            
             this.initLaserInstance()
         }
     }
 
     initLaserInstance(){
         console.log("发射激光")
+        this.laserInstance = instantiate(this.bulletPrefab)
+        this.laserInstance.setParent(Global.Instance<Global>().canvas3D)
+        this.updateLaserPosition()
+    }
+
+    updateLaserPosition(){
         let line:LineComponent = this.laserInstance.getComponent(LineComponent)
         line.positions = [this.node.worldPosition,this.atkMonster.node.worldPosition] as never[]
     }

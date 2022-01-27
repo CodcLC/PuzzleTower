@@ -91,13 +91,13 @@ export class BaseTower extends Component {
     }
 
     //射程
-    private atkRange = 200;
+    private alertRange = 200;
     @property
-    public get AtkRange() {
-        return this.atkRange;
+    public get AlertRange() {
+        return this.alertRange;
     }
-    public set AtkRange(value) {
-        this.atkRange = value;
+    public set AlertRange(value) {
+        this.alertRange = value;
     }
 
     //瓦片
@@ -118,9 +118,13 @@ export class BaseTower extends Component {
     graphic:Graphics
     atkSchedule = null
 
-    laserPrefab:Prefab
+    bulletPrefab:Prefab
     bulletPool:NodePool
 
+    //警戒范围内的怪物
+    alertMonsters = new Array<BaseMonster>()
+    removeAlertMonsters = new Array<BaseMonster>()
+    newAlertMonsters = new Array<BaseMonster>()
     alert = false
 
     onLoad(){
@@ -132,22 +136,77 @@ export class BaseTower extends Component {
         let color = new Color("#95CACA")
         this.graphic.strokeColor = color
         this.graphic.lineWidth = 5
-        this.graphic.circle(0,0,this.atkRange)
+        this.graphic.circle(0,0,this.alertRange)
         this.graphic.stroke()
 
         this.bulletPool = new NodePool()
     }
 
+    update (deltaTime: number) {
+        if(this.state != TowerState.Disable){
+            this.UpdateAtkMonsters()
+        }
+     }
 
-
-    checkMonstersPosition(){
+    /**
+     * 获取怪物距离
+     * @param monster 
+     * @returns 
+     */
+    getMonsterDistance(monster:BaseMonster):number{
         let towerPosition = this.node.worldPosition
+        let monsterPos = monster.node.worldPosition
+        let distance = Math.sqrt(Math.pow(monsterPos.x-towerPosition.x,2)+Math.pow(monsterPos.y-towerPosition.y,2))
+        return distance
+    }
+
+    CheckMonsterInAlertRange(monster:BaseMonster):boolean{
+        let distance = this.getMonsterDistance(monster)
+        if (distance<this.AlertRange){
+            return true
+        }
+        else{
+            return false
+        }
+    }
+
+    /**
+     * 更新警戒范围内怪物
+     */
+    UpdateAtkMonsters(){
+        let monsters = Global.Instance<Global>().monsterManager.monsterObjects
+        this.removeAlertMonsters.length = 0
+        this.newAlertMonsters.length = 0
+        let alertMonsters = []
+        monsters.forEach((monster)=>{
+            let alert = this.CheckMonsterInAlertRange(monster)
+            if (alert){
+                alertMonsters.push(monster)
+                //新加入范围的怪物
+                if (!this.alertMonsters.includes(monster)){
+                    console.error("新加入范围怪物  ",monster)
+                    this.newAlertMonsters.push(monster)
+                }
+            }else{
+                //离开范围的怪物
+                if (this.alertMonsters.includes(monster)){
+                    this.removeAlertMonsters.push(monster)
+                }
+            }
+        })
+        this.alertMonsters = alertMonsters
+    }
+
+    /**
+     * 更新当前攻击怪物
+     * @returns 
+     */
+    UpdateAtkMonster(){
         let monsters = Global.Instance<Global>().monsterManager.monsterObjects
         let atkMonster,minDistance:number
-        monsters.forEach((monster)=>{
-            let monsterPos = monster.node.worldPosition
-            let distance = Math.sqrt(Math.pow(monsterPos.x-towerPosition.x,2)+Math.pow(monsterPos.y-towerPosition.y,2))
-            if ((atkMonster==null && distance<this.AtkRange) || distance<minDistance){
+        this.alertMonsters.forEach((monster)=>{
+            let distance = this.getMonsterDistance(monster)
+            if (atkMonster == null || distance<minDistance){
                 atkMonster = monster
                 minDistance = distance
             }
@@ -184,11 +243,6 @@ export class BaseTower extends Component {
 
     }
   
-   
-
-    update (deltaTime: number) {
-       
-    }
 
     /**
      * 正常的攻击表现
@@ -198,7 +252,7 @@ export class BaseTower extends Component {
         if (this.state == TowerState.Disable){
             return
         }
-        let chectResult = this.checkMonstersPosition()
+        let chectResult = this.UpdateAtkMonster()
         if(chectResult == CheckMonsterResult.Different){
             tower.stopAtk()
             tower.startAtk()

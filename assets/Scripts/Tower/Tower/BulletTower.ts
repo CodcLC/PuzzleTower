@@ -52,9 +52,9 @@ export class BulletTower extends BaseTower {
             return
         }
         let bulletPath = getPathByBulletType(this.Type)
-        if (this.laserPrefab==null){
+        if (this.bulletPrefab==null){
             resources.load(bulletPath.valueOf(),Prefab,(error,bulletPrefab)=>{
-                this.laserPrefab = bulletPrefab
+                this.bulletPrefab = bulletPrefab
                 this.createBulletInstance()
             })
         }else{
@@ -78,7 +78,7 @@ export class BulletTower extends BaseTower {
      * @returns 
      */
     createBulletInstance(){
-        if (this.laserPrefab == null) {
+        if (this.bulletPrefab == null) {
             return
         }
         console.log("发射子弹")
@@ -86,7 +86,7 @@ export class BulletTower extends BaseTower {
         if (this.bulletPool.size() > 0) {
             bulletInstance = this.bulletPool.get();
         } else {
-            bulletInstance = instantiate(this.laserPrefab);
+            bulletInstance = instantiate(this.bulletPrefab);
         }
         let bullet:Bullet = bulletInstance.getComponent(Bullet)
         bullet.Init({owner:this.node, damage:1,target:this.atkMonster.node})

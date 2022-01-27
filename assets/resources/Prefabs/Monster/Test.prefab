@@ -8,12 +8,14 @@
       "__id__": 1
     },
     "optimizationPolicy": 0,
+    "persistent": false,
     "asyncLoadAssets": false
   },
   {
     "__type__": "cc.Node",
     "_name": "Test",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "_parent": null,
     "_children": [],
     "_active": true,
@@ -143,7 +145,7 @@
       "__id__": 7
     },
     "hp": 100,
-    "speed": 0,
+    "speed": 100,
     "_id": ""
   },
   {

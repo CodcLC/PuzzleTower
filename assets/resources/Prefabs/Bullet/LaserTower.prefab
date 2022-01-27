@@ -8,12 +8,14 @@
       "__id__": 1
     },
     "optimizationPolicy": 0,
+    "persistent": false,
     "asyncLoadAssets": false
   },
   {
     "__type__": "cc.Node",
     "_name": "LaserTower",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "_parent": null,
     "_children": [],
     "_active": true,
@@ -23,7 +25,7 @@
       }
     ],
     "_prefab": {
-      "__id__": 5
+      "__id__": 6
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -44,7 +46,7 @@
       "y": 1,
       "z": 1
     },
-    "_layer": 1,
+    "_layer": 2,
     "_euler": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -65,7 +67,7 @@
       "__id__": 3
     },
     "_texture": null,
-    "_worldSpace": false,
+    "_worldSpace": true,
     "_positions": [
       {
         "__type__": "cc.Vec3",
@@ -75,11 +77,14 @@
       },
       {
         "__type__": "cc.Vec3",
-        "x": 0,
-        "y": 0,
+        "x": 199,
+        "y": 200,
         "z": 0
       }
     ],
+    "_width": {
+      "__id__": 4
+    },
     "_tile": {
       "__type__": "cc.Vec2",
       "x": 1,
@@ -91,7 +96,7 @@
       "y": 0
     },
     "_color": {
-      "__id__": 4
+      "__id__": 5
     },
     "_id": ""
   },
@@ -100,13 +105,19 @@
     "fileId": "05ZnPtepVNYIYcE/j0zR/d"
   },
   {
+    "__type__": "cc.CurveRange",
+    "mode": 0,
+    "constant": 10,
+    "multiplier": 1
+  },
+  {
     "__type__": "cc.GradientRange",
     "_mode": 0,
     "color": {
       "__type__": "cc.Color",
       "r": 255,
-      "g": 255,
-      "b": 255,
+      "g": 0,
+      "b": 0,
       "a": 255
     }
   },

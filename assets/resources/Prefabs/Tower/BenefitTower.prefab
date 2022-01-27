@@ -8,13 +8,14 @@
       "__id__": 1
     },
     "optimizationPolicy": 0,
-    "asyncLoadAssets": false,
-    "persistent": false
+    "persistent": false,
+    "asyncLoadAssets": false
   },
   {
     "__type__": "cc.Node",
-    "_name": "LaserTower",
+    "_name": "BenefitTower",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "_parent": null,
     "_children": [
       {
@@ -125,8 +126,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 93,
-      "height": 87
+      "width": 97,
+      "height": 97
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -162,7 +163,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "8579492b-90c1-4108-b0ee-0f0e7bbfdf6c@f9941",
+      "__uuid__": "4bcddee1-70f1-434d-8352-3ff02edaa6ae@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 1,
@@ -268,7 +269,7 @@
     "fileId": "03ZyvmSRtBTaNz0ZRHskKz"
   },
   {
-    "__type__": "1a949Uqpx9FEYzEQUjOaS+O",
+    "__type__": "98434utX4hFc5K94yCiEfpz",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -286,7 +287,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "47tzXcoWFID5Bzr5YwixiG"
+    "fileId": "37zshrcAVAFKut1dKPdtiO"
   },
   {
     "__type__": "cc.PrefabInfo",

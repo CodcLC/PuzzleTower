@@ -25,6 +25,9 @@ export class Global extends CSingleton<Global>{
     @property({type:UITransform})
     uiRootTrans:UITransform
 
+    @property(Node)
+    canvas3D:Node
+
     //塔瓦片管理
     @property({type:MapTilesManager})
     mapTilesManager:MapTilesManager
